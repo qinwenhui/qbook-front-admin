@@ -20,6 +20,9 @@ service.interceptors.request.use(
   config => {
     // do something before request is sent
     //设置json格式的参数转为正常类型
+    config.paramsSerializer = function (params) {
+      return qs.stringify(params, {arrayFormat: 'repeat'})
+    }
     config.data = qs.stringify(config.data);
     if (store.getters.token) {
       // let each request carry token
@@ -57,7 +60,7 @@ service.interceptors.response.use(
         type: 'error',
         duration: 5 * 1000
       })
-      
+
       //如果属于登录过期之类的，跳转到登录页面
       if(res.code === '8848'){
         MessageBox.alert('您已退出登录，请重新登录', '登录提示', {
