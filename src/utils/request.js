@@ -2,19 +2,25 @@ import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
+import qs from 'qs'
 
 // create an axios instance
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
-  timeout: 5000 // request timeout
+  timeout: 5000, // request timeout
+  //设置请求Content-Type默认为正常参数传输模式，原来是json的
+  headers:{
+    'Content-Type': 'application/x-www-form-urlencoded'
+  }
 })
 
 // request interceptor
 service.interceptors.request.use(
   config => {
     // do something before request is sent
-
+    //设置json格式的参数转为正常类型
+    config.data = qs.stringify(config.data);
     if (store.getters.token) {
       // let each request carry token
       // ['X-Token'] is a custom headers key
@@ -44,6 +50,27 @@ service.interceptors.response.use(
    */
   response => {
     const res = response.data
+    if (res.code !== '0') {
+      //请求响应码
+      Message({
+        message: res.msg || 'Error',
+        type: 'error',
+        duration: 5 * 1000
+      })
+      
+      //如果属于登录过期之类的，跳转到登录页面
+      if(res.code === '8848'){
+        MessageBox.alert('您已退出登录，请重新登录', '登录提示', {
+          confirmButtonText: '登录',
+          // cancelButtonText: 'Cancel',
+          type: 'warning'
+        }).then(() => {
+          store.dispatch('user/resetToken').then(() => {
+            location.reload()
+          })
+        })
+      }
+    }
     return res;
     //先暂时关闭过滤器
     // // if the custom code is not 20000, it is judged as an error.

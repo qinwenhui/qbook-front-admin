@@ -53,7 +53,9 @@ export default {
     },
     async logout() {
       await this.$store.dispatch('user/logout')
-      this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+      //采用正常的跳转页面方式跳转到登录页面，不然会造成切换用户后权限没有重新检测导致权限菜单等出错
+      // this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+      // location.reload(`/login?redirect=${this.$route.fullPath}`)
     }
   }
 }
