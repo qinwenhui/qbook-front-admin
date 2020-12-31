@@ -82,3 +82,35 @@ export function updateRoleAndMenu(data) {
     data
   })
 }
+//查询权限列表
+export function getPermission(params) {
+  return request({
+    url: '/admin/system/permissionlist',
+    method: 'get',
+    params
+  })
+}
+//添加权限
+export function addPermission(data) {
+  return request({
+    url: '/admin/system/addpermission',
+    method: 'post',
+    data
+  })
+}
+//编辑权限
+export function updatePermission(data) {
+  return request({
+    url: '/admin/system/editpermission',
+    method: 'post',
+    data
+  })
+}
+//删除权限
+export function deletePermission(id) {
+  return request({
+    url: '/admin/system/deletepermission',
+    method: 'get',
+    params: { id }
+  })
+}
