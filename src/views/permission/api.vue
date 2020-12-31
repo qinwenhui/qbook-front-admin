@@ -140,6 +140,7 @@ export default {
     //添加
     handleAddPermission (){
       console.log('添加接口权限')
+      this.dialogType = 'add'
       this.dialogVisible = true;
       this.permission = deepClone(defaultPermission);
     },
