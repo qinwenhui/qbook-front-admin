@@ -15,6 +15,15 @@ export function getAllMenu() {
   })
 }
 
+//查询某个角色的菜单
+export function getMenuByRole(roleId) {
+  return request({
+    url: '/admin/admin/userMenuListByRole',
+    method: 'get',
+    params: { roleId }
+  })
+}
+
 //查询角色
 export function getRoles(params) {
   return request({
@@ -32,6 +41,15 @@ export function addRole(data) {
     data
   })
 }
+//添加角色和对应权限
+export function addRoleAndMenu(data) {
+  console.log(data)
+  return request({
+    url: '/admin/system/addroleandmenu',
+    method: 'post',
+    data
+  })
+}
 //删除角色
 export function deleteRole(id) {
   return request({
@@ -40,10 +58,26 @@ export function deleteRole(id) {
     params: { id }
   })
 }
+//删除角色以及对应菜单权限
+export function deleteRoleAndMenu(id) {
+  return request({
+    url: '/admin/system/deleteroleandmenu',
+    method: 'get',
+    params: { id }
+  })
+}
 //更新角色
 export function updateRole(data) {
   return request({
     url: '/admin/system/editrole',
+    method: 'post',
+    data
+  })
+}
+//更新角色以及对应菜单权限
+export function updateRoleAndMenu(data) {
+  return request({
+    url: '/admin/system/editroleandmenu',
     method: 'post',
     data
   })

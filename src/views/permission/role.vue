@@ -1,23 +1,23 @@
 <!--  -->
 <template>
-<div class='#main'>
+<div class='main'>
   <div class="app-container">
     <el-button type="primary" @click="handleAddRole">
       新增角色
     </el-button>
 
     <el-table :data="rolesList" style="width: 100%;margin-top:30px;" border>
-      <el-table-column align="center" label="Role Key" width="220">
+      <el-table-column align="center" label="编号" width="220">
         <template slot-scope="scope">
           {{ scope.row.id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Role Name" width="220">
+      <el-table-column align="center" label="名称" width="220">
         <template slot-scope="scope">
           {{ scope.row.name }}
         </template>
       </el-table-column>
-      <el-table-column align="header-center" label="Description">
+      <el-table-column align="header-center" label="简介">
         <template slot-scope="scope">
           {{ scope.row.description }}
         </template>
@@ -25,7 +25,7 @@
       <el-table-column align="center" label="Operations">
         <template slot-scope="scope">
           <el-button type="primary" size="small" @click="handleEdit(scope)">
-            菜单权限
+            编辑
           </el-button>
           <el-button type="danger" size="small" @click="handleDelete(scope)">
             删除
@@ -69,7 +69,8 @@
 //例如：import 《组件名称》 from '《组件路径》';
 import path from 'path'
 import { deepClone } from '@/utils'
-import { getAllMenu, getRoles, addRole, deleteRole, updateRole } from '@/api/system'
+import { generateRoutes, getIdByMenuPath } from '@/utils/menu'
+import { getAllMenu, getRoles, addRoleAndMenu, deleteRoleAndMenu, updateRoleAndMenu, getMenuByRole } from '@/api/system'
 import store from '@/store'
 
 const defaultRole = {
@@ -89,6 +90,7 @@ export default {
       role: Object.assign({}, defaultRole),
       routes: [],
       rolesList: [],
+      allMenus: [],
       dialogVisible: false,
       dialogType: 'new',
       checkStrictly: false,
@@ -113,10 +115,8 @@ export default {
     async getRoutes() {
       const res = await getAllMenu()
       const menus = res.data
-      const allMenus = await store.dispatch('permission/generateRoutes', menus)
-      console.log(allMenus)
-      this.routes = this.generateRoutes(allMenus)
-      console.log(this.routes)
+      this.allMenus = generateRoutes(menus)
+      this.routes = this.generateRoutes(this.allMenus)
     },
     async getRoles() {
       const res = await getRoles({pageNo:1, pageSize: 10})
@@ -135,14 +135,16 @@ export default {
       this.dialogType = 'edit'
       this.dialogVisible = true
       this.checkStrictly = true
-      // this.role = deepClone(scope.row)
-      this.role = scope.row
+      this.role = deepClone(scope.row)
+      //获取该角色的菜单
+      const roleId = this.role.id
       this.$nextTick(() => {
-        //暂时不设置菜单权限
-        // const routes = this.generateRoutes(this.role.routes)
-        // this.$refs.tree.setCheckedNodes(this.generateArr(routes))
-        // set checked state of a node not affects its father and child nodes
-        this.checkStrictly = false
+        getMenuByRole(roleId).then(async (res)=>{
+          const menus = generateRoutes(res.data)
+          const routes = this.generateRoutes(menus)
+          this.$refs.tree.setCheckedNodes(this.generateArr(routes))
+          this.checkStrictly = false
+        })
       })
     },
     handleDelete({ $index, row }) {
@@ -152,7 +154,7 @@ export default {
         type: 'warning'
       })
         .then(async() => {
-          await deleteRole(row.id)
+          await deleteRoleAndMenu(row.id)
           this.rolesList.splice($index, 1)
           this.$message({
             type: 'success',
@@ -163,9 +165,7 @@ export default {
     },
     generateRoutes(routes, basePath = '/') {
       const res = []
-
       for (let route of routes) {
-
         // skip some route
         if (route.hidden) { continue }
 
@@ -176,15 +176,19 @@ export default {
 
         const data = {
           path: path.resolve(basePath, route.path),
-          title: route.meta && route.meta.title
-
+          title: route.meta && route.meta.title,
+          id: route.id
         }
 
         // recursive child routes
         if (route.children) {
           data.children = this.generateRoutes(route.children, data.path)
         }
-        res.push(data)
+        //因为生成的菜单会多出一个空的，所以这里先去掉
+        if(typeof(data.title)!='undefined'){
+          res.push(data)
+        }
+        
       }
 
       return res
@@ -245,10 +249,20 @@ export default {
       // console.log(checkedKeys)
       // console.log(this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys))
       // this.role.routes = this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys)
-
+      const checkedNodes = this.$refs.tree.getCheckedNodes();
+      let menuIds = '';
+      for(let node of checkedNodes){
+        menuIds += node.id + ","
+      }
+      //去掉末尾,
+      menuIds = menuIds.substring(0, menuIds.length-1)
+      const params = {
+        ...this.role,
+        menuIds: menuIds
+      }
       if (isEdit) {
         console.log('编辑')
-        await updateRole(this.role)
+        await updateRoleAndMenu(params)
         for (let index = 0; index < this.rolesList.length; index++) {
           if (this.rolesList[index].id === this.role.id) {
             this.rolesList.splice(index, 1, Object.assign({}, this.role))
@@ -257,7 +271,7 @@ export default {
         }
       } else {
         console.log('添加')
-        const { data } = await addRole(this.role)
+        const { data } = await addRoleAndMenu(params)
         this.role.id = data.id
         this.rolesList.push(this.role)
       }
@@ -281,21 +295,10 @@ export default {
     this.getRoles()
     this.getRoutes()
   },
-  //生命周期 - 挂载完成（可以访问DOM元素）
-  mounted() {
-
-  },
-  beforeCreate() {}, //生命周期 - 创建之前
-  beforeMount() {}, //生命周期 - 挂载之前
-  beforeUpdate() {}, //生命周期 - 更新之前
-  updated() {}, //生命周期 - 更新之后
-  beforeUnmount() {}, //生命周期 - 销毁之前
-  unmounted() {}, //生命周期 - 销毁完成
-  activated() {}, //如果页面有keep-alive缓存功能，这个函数会触发
 }
 </script>
 <style scoped>
-#main{
+.main{
 
 }
 </style>
