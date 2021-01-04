@@ -114,3 +114,11 @@ export function deletePermission(id) {
     params: { id }
   })
 }
+//修改角色的接口权限
+export function updateRoleAndPermission(params){
+  return request({
+    url: '/admin/system/addrolepermissionall',
+    method: 'get',
+    params
+  })
+}
