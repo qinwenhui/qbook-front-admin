@@ -33,7 +33,7 @@
         </el-table-column>
         <el-table-column
           prop="pid"
-          label="父级菜单">
+          label="父级菜单编号">
         </el-table-column>
         <el-table-column
           prop="sort"
@@ -133,8 +133,6 @@ export default {
   },
 
   computed: {},
-
-  mounted: {},
 
   methods: {
       //加载权限列表
