@@ -21,3 +21,12 @@ export function logout() {
     method: 'get'
   })
 }
+
+//获取用户列表
+export function getUserList(params) {
+  return request({
+    url: '/admin/admin/userlist',
+    method: 'get',
+    params
+  })
+}

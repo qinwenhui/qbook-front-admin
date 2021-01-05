@@ -67,6 +67,16 @@ export function getRoles(params) {
     params
   })
 }
+
+//根据用户查询角色
+export function getRoleByUser(params) {
+  return request({
+    url: '/admin/admin/roleListByUser',
+    method: 'get',
+    params
+  })
+}
+
 //添加角色
 export function addRole(data) {
   console.log(data)

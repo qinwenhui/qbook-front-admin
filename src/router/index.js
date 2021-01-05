@@ -91,6 +91,30 @@ export const asyncRoutes = [
       }
     ]
   },
+  {
+    path: '/user',
+    component: Layout,
+    redirect: '/user/list',
+    name: 'User',
+    meta: {
+      title: '用户',
+      icon: 'nested'
+    },
+    children: [
+      {
+        path: '/list',
+        component: () => import('@/views/user/list'),
+        name: 'UserList',
+        meta: { title: '用户' }
+      },
+      {
+        path: '/feedback',
+        component: () => import('@/views/user/feedback'),
+        name: 'Feedback',
+        meta: { title: '反馈' }
+      }
+    ]
+  },
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
