@@ -14,7 +14,42 @@ export function getAllMenu() {
     method: 'get'
   })
 }
-
+//查询菜单列表
+export function getMenuList(params) {
+  return request({
+    url: '/admin/system/menulist',
+    method: 'get',
+    params
+  })
+}
+//修改菜单
+export function updateMenu(data) {
+  console.log(data)
+  return request({
+    url: '/admin/system/editmenu',
+    method: 'post',
+    data
+  })
+}
+//添加菜单
+export function addMenu(data) {
+  console.log(data)
+  return request({
+    url: '/admin/system/addmenu',
+    method: 'post',
+    data
+  })
+}
+//删除菜单
+export function deleteMenu(id) {
+  return request({
+    url: '/admin/system/deletemenu',
+    method: 'get',
+    params:{
+      id: id
+    }
+  })
+}
 //查询某个角色的菜单
 export function getMenuByRole(roleId) {
   return request({

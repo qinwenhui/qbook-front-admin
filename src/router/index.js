@@ -117,6 +117,12 @@ export const asyncRoutes = [
         component: () => import('@/views/permission/api'),
         name: 'Api',
         meta: { title: '接口' }
+      },
+      {
+        path: '/menu',
+        component: () => import('@/views/permission/menu'),
+        name: 'Menu',
+        meta: { title: '菜单' }
       }
     ]
   },
