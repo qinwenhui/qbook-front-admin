@@ -5,7 +5,7 @@
     <el-button type="primary" @click="handleAddRole">
       新增角色
     </el-button>
-
+    <el-button icon="el-icon-refresh" circle @click="getRoles"></el-button>
     <el-table :data="rolesList" style="width: 100%;margin-top:30px;" border>
       <el-table-column align="center" label="编号" width="220">
         <template slot-scope="scope">

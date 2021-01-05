@@ -5,6 +5,7 @@
       <el-button type="primary" @click="handleAddMenu">
         新增菜单
       </el-button>
+      <el-button icon="el-icon-refresh" circle @click="loadMenu"></el-button>
       <el-table
         v-loading="loading"
         :data="menuList"

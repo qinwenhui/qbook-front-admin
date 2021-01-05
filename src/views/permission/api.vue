@@ -5,6 +5,7 @@
       <el-button type="primary" @click="handleAddPermission">
         新增接口
       </el-button>
+      <el-button icon="el-icon-refresh" circle @click="loadPermission"></el-button>
       <el-table
         v-loading="loading"
         :data="permissionList"
