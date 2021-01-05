@@ -25,9 +25,9 @@
       <el-table-column align="center" label="Operations">
         <template slot-scope="scope">
           <el-button type="primary" size="small" @click="handleEdit(scope)">
-            编辑
+            菜单权限
           </el-button>
-          <el-button type="primary" size="small" @click="handleApi(scope)">
+          <el-button type="warning" size="small" @click="handleApi(scope)">
             接口权限
           </el-button>
           <el-button type="danger" size="small" @click="handleDelete(scope)">
@@ -65,12 +65,14 @@
     </el-dialog>
 
     <!-- 编辑角色权限 -->
-    <el-dialog :visible.sync="apiDialogVisible" title="编辑接口权限">
+    <el-dialog :visible.sync="apiDialogVisible" title="编辑接口权限" >
       <el-table
         ref="multipleTable"
         :data="allPermission"
+        v-loading="loading"
         tooltip-effect="dark"
         style="width: 100%"
+        height="500"
         @row-click="toggleSelection"
         @selection-change="handleSelectionChange">
         <el-table-column
@@ -88,14 +90,6 @@
           show-overflow-tooltip>
         </el-table-column>
       </el-table>
-      <!-- 分页 -->
-      <div class="block pageNav">
-        <el-pagination
-          @current-change="changePage"
-          layout="prev, pager, next"
-          :total="permissionTotal">
-        </el-pagination>
-      </div>
       <div style="text-align:right;">
         <el-button type="danger" @click="apiDialogVisible=false">
           取消
@@ -115,7 +109,7 @@
 import path from 'path'
 import { deepClone } from '@/utils'
 import { generateRoutes, getIdByMenuPath } from '@/utils/menu'
-import { getAllMenu, getRoles, addRoleAndMenu, deleteRoleAndMenu, updateRoleAndMenu, getMenuByRole, updateRoleAndPermission, getPermission } from '@/api/system'
+import { getAllMenu, getRoles, addRoleAndMenu, deleteRoleAndMenu, updateRoleAndMenu, getMenuByRole, updateRoleAndPermission, getPermission, getPermissionByRole } from '@/api/system'
 import store from '@/store'
 
 const defaultRole = {
@@ -145,10 +139,8 @@ export default {
       },
       apiDialogVisible: false,
       allPermission: [],
-      permissionPageNo: 1,
-      permissionTotal: 0,
       selectedPermissionIds: '',
-      selectedRoleId: ''
+      loading: false
     };
   },
   //接收参数
@@ -173,17 +165,10 @@ export default {
       const res = await getRoles({pageNo:1, pageSize: 10})
       this.rolesList = res.data.list
     },
-    //获取所有接口
+    //获取接口列表
     async getPermission() {
-      const res = await getPermission({pageNo: this.permissionPageNo, pageSize: 10})
+      const res = await getPermission({pageNo: 1, pageSize: 1000})
       this.allPermission = res.data.list
-      this.permissionTotal = res.data.total
-    },
-    //分页
-    changePage(pageNo) {
-      this.permissionPageNo = pageNo
-      //加载下一页数据
-      this.getPermission();
     },
     //弹出添加角色框
     handleAddRole() {
@@ -212,8 +197,10 @@ export default {
     },
     handleApi (scope){
       console.log('编辑角色权限')
-      this.apiDialogVisible = true;
-      console.log(scope)
+      this.apiDialogVisible = true
+      this.role = deepClone(scope.row)
+      this.generateApis()
+      
     },
     handleDelete({ $index, row }) {
       this.$confirm('确认删除该角色?', 'Warning', {
@@ -230,6 +217,26 @@ export default {
           })
         })
         .catch(err => { console.error(err) })
+    },
+    //勾选已经拥有的接口
+    generateApis() {
+      //先获取该角色已经拥有的接口列表
+      getPermissionByRole(this.role.id).then((res=>{
+        if(res.code == '0'){
+          this.$refs.multipleTable.clearSelection();
+          const list = res.data
+          //勾选已经拥有的接口权限
+          for(let permission of this.allPermission){
+            for(let selectedPermission of list){
+              if(selectedPermission.id == permission.id){
+                //勾选
+                this.$refs.multipleTable.toggleRowSelection(permission);
+                break;
+              }
+            }
+          }
+        }
+      }))
     },
     generateRoutes(routes, basePath = '/') {
       const res = []
@@ -313,16 +320,27 @@ export default {
     //编辑角色接口权限确认
     confirmApi () {
       console.log('----确认编辑角色接口权限----')
-      console.log(this.role)
-      // const params = {
-      //   roleId: 1,
-      //   permissionIds: '1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,40,41,42'
-      // }
-      // updateRoleAndPermission(params).then((res)=>{
-      //   if(res.code == '0'){
-      //     console.log(res)
-      //   }
-      // })
+      this.loading = true
+      const params = {
+        roleId: this.role.id,
+        permissionIds: this.selectedPermissionIds
+      }
+      console.log(params)
+      updateRoleAndPermission(params).then((res)=>{
+        this.loading = false
+        if(res.code == '0'){
+          this.apiDialogVisible = false
+          this.$message({
+            type: 'success',
+            message: 'Edit succed!'
+          })
+        }else{
+          this.$message({
+            type: 'error',
+            message: 'Edit Error!'
+          })
+        }
+      })
     },
     async confirmRole() {
       const isEdit = this.dialogType === 'edit'
@@ -378,13 +396,11 @@ export default {
     },
     //选中时
     handleSelectionChange(val) {
-      console.log(val)
       let ids = '';
       for(let permission of val){
         ids += permission.id + ','
       }
       this.selectedPermissionIds = ids.substring(0, ids.length-1)
-      console.log(this.selectedPermissionIds)
     }
   },
   //生命周期 - 创建完成（可以访问当前this实例）

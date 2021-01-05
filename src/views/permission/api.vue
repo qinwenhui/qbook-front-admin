@@ -27,10 +27,6 @@
           prop="description"
           label="描述">
         </el-table-column>
-        <el-table-column
-          prop="status"
-          label="状态">
-        </el-table-column>
         <el-table-column align="center" label="操作">
         <template slot-scope="scope">
           <el-button type="primary" size="small" @click="handleEdit(scope)">

@@ -90,6 +90,14 @@ export function getPermission(params) {
     params
   })
 }
+//根绝角色编号获取接口列表
+export function getPermissionByRole(roleId){
+  return request({
+    url: '/admin/system/permissionbyrole',
+    method: 'get',
+    params:{roleId: roleId}
+  })
+}
 //添加权限
 export function addPermission(data) {
   return request({
