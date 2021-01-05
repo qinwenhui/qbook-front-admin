@@ -2,10 +2,26 @@
 <template>
   <div class="main">
     <div class="app-container">
-      <el-button type="primary" @click="handleAddPermission">
-        新增接口
-      </el-button>
-      <el-button icon="el-icon-refresh" circle @click="loadPermission"></el-button>
+      <el-row :gutter="20">
+        <el-col :span="4">
+          <el-button type="primary" @click="handleAddPermission">
+            新增接口
+          </el-button>
+        </el-col>
+        <el-col :span="4">
+          <el-input placeholder="请输入名称" v-model="keyword.name" clearable ></el-input>
+        </el-col>
+        <el-col :span="4">
+          <el-input placeholder="请输入地址" v-model="keyword.url" clearable></el-input>
+        </el-col>
+        <el-col :span="4">
+          <el-input placeholder="请输入描述" v-model="keyword.description" clearable></el-input>
+        </el-col>
+        <el-col :span="4">
+          <el-button @click="loadPermission">查询</el-button>
+        </el-col>
+      </el-row>
+      
       <el-table
         v-loading="loading"
         :data="permissionList"
@@ -101,7 +117,12 @@ export default {
       total: 0,
       pageNo: 1,
       pageSize: 10,
-      loading: false
+      loading: false,
+      keyword: {
+        name: '',
+        url: '',
+        description: ''
+      }
     };
   },
 
@@ -115,6 +136,7 @@ export default {
       //先显示加载中图标
       this.loading = true;
       const params = {
+        ...this.keyword,
         pageNo: this.pageNo,
         pageSize: this.pageSize,
       }
