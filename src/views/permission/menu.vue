@@ -61,7 +61,7 @@
       </div>
 
       <!-- 弹出框 -->
-      <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑接口':'新增接口'">
+      <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑菜单':'新增菜单'">
       <el-form :model="menu" label-width="80px" label-position="left">
         <el-form-item label="图标">
           <e-icon-picker v-model="menu.icon" :options="options" />
@@ -161,7 +161,7 @@ export default {
     },
     //添加
     handleAddMenu (){
-      console.log('添加接口权限')
+      console.log('添加菜单权限')
       this.dialogType = 'add'
       this.dialogVisible = true;
       this.menu = deepClone(defaultMenu);
@@ -175,8 +175,8 @@ export default {
     },
     //删除
     handleDelete({ $index, row }) {
-      console.log('删除接口')
-      this.$confirm('确认删除该接口?', 'Warning', {
+      console.log('删除菜单')
+      this.$confirm('确认删除该菜单?', 'Warning', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
