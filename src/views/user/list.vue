@@ -62,6 +62,9 @@
           <el-button type="primary" size="small" @click="handleEdit(scope)">
             角色授权
           </el-button>
+          <el-button type="warning" size="small" @click="openResetPass(scope)">
+            密码重置
+          </el-button>
           <el-button type="danger" size="small" @click="handleDelete(scope)">
             {{showStatusBtn(scope.row.status)}}
           </el-button>
@@ -253,6 +256,27 @@ export default {
         return "恢复"
       }
     },
+    //打开重置密码窗口
+    openResetPass(scope) {
+        this.$prompt('请输入新密码', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消'
+        }).then(({ value }) => {
+          updateUser({id: scope.row.id, password: value}).then(res=>{
+            if(res.code == "0"){
+              this.$message({
+                type: 'success',
+                message: '密码重置成功,该用户新密码是: ' + value
+              });
+            }else{
+              this.$message("重置密码无效");
+            }
+          })
+          
+        }).catch(() => {
+                 
+        });
+    }
   },
   created: function(){
     this.loadUserList();
