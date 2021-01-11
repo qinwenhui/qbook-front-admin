@@ -54,7 +54,7 @@
         <el-table-column
           label="状态">
           <template slot-scope="scope">
-              {{scope.row.status}}
+              {{showStatus(scope.row.status)}}
           </template>
         </el-table-column>
         <el-table-column align="center" label="操作">
@@ -63,7 +63,7 @@
             角色授权
           </el-button>
           <el-button type="danger" size="small" @click="handleDelete(scope)">
-            删除
+            {{showStatusBtn(scope.row.status)}}
           </el-button>
         </template>
       </el-table-column>
@@ -122,7 +122,8 @@
 <script>
 import { deepClone } from '@/utils'
 import { getUserList } from '@/api/user';
-import { getRoles, getRoleByUser } from '@/api/system';
+import { getRoles, getRoleByUser, addRoleByUser } from '@/api/system';
+import { updateUser } from '@/api/user';
 const defaultUser = {
     id: '',
     username: ''
@@ -186,7 +187,14 @@ export default {
         this.generateRoles()
     },
     handleDelete(scope){
-
+      const status = scope.row.status==1?0:1
+      updateUser({id: scope.row.id, status: status}).then(res=>{
+        this.$message(res.msg);
+        if(res.code == "0"){
+          //重新加载列表
+          this.loadUserList()
+        }
+      })
     },
     //点击一行
     toggleSelection(row) {
@@ -203,7 +211,12 @@ export default {
     },
     //编辑用户角色确认
     confirm() {
-        console.log(this.selectedRoleIds)
+      addRoleByUser({userId: this.user.id, roleIds: this.selectedRoleIds}).then(res=>{
+        if(res.code == "0"){
+          this.dialogVisible = false
+        }
+        this.$message(res.msg);
+      })
     },
     generateRoles() {
       //先获取该角色已经拥有的接口列表
@@ -223,6 +236,22 @@ export default {
           }
         }
       }))
+    },
+    //显示状态
+    showStatus(status){
+      if(status == 1){
+        return "正常"
+      }else{
+        return "冻结"
+      }
+    },
+    //显示修改状态按钮
+    showStatusBtn(status){
+      if(status == 1){
+        return "冻结"
+      }else{
+        return "恢复"
+      }
     },
   },
   created: function(){

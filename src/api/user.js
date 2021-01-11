@@ -30,3 +30,12 @@ export function getUserList(params) {
     params
   })
 }
+
+//修改用户
+export function updateUser(data) {
+  return request({
+    url: '/admin/admin/updateUser',
+    method: 'post',
+    data
+  })
+}

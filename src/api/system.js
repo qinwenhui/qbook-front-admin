@@ -79,9 +79,17 @@ export function getRoleByUser(params) {
 
 //添加角色
 export function addRole(data) {
-  console.log(data)
   return request({
     url: '/admin/system/addrole',
+    method: 'post',
+    data
+  })
+}
+
+//根据用户添加角色
+export function addRoleByUser(data) {
+  return request({
+    url: '/admin/system/adduserroleall',
     method: 'post',
     data
   })
@@ -168,10 +176,10 @@ export function deletePermission(id) {
   })
 }
 //修改角色的接口权限
-export function updateRoleAndPermission(params){
+export function updateRoleAndPermission(data){
   return request({
     url: '/admin/system/addrolepermissionall',
-    method: 'get',
-    params
+    method: 'post',
+    data
   })
 }
